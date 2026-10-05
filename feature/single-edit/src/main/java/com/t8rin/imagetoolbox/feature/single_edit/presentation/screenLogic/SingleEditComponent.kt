@@ -64,6 +64,10 @@ import com.t8rin.imagetoolbox.core.domain.utils.update
 import com.t8rin.imagetoolbox.core.filters.domain.FilterProvider
 import com.t8rin.imagetoolbox.core.filters.domain.model.Filter
 import com.t8rin.imagetoolbox.core.filters.presentation.model.UiAutoToneFilter
+import com.t8rin.imagetoolbox.core.filters.presentation.model.UiGrainFilter
+import com.t8rin.imagetoolbox.core.filters.presentation.model.UiSaturationFilter
+import com.t8rin.imagetoolbox.core.filters.presentation.model.UiVibranceFilter
+import com.t8rin.imagetoolbox.core.filters.presentation.model.UiWhiteBalanceFilter
 import com.t8rin.imagetoolbox.core.filters.presentation.model.UiFilter
 import com.t8rin.imagetoolbox.core.filters.presentation.widget.FilterTemplateCreationSheetComponent
 import com.t8rin.imagetoolbox.core.filters.presentation.widget.addFilters.AddFiltersSheetComponent
@@ -919,11 +923,22 @@ class SingleEditComponent @AssistedInject internal constructor(
         _filterList.update { listOf() }
     }
 
-    /** [MOD] Lightroom「光」面板：把 6 个影调值（偏移量）即时应用到当前位图 */
-    fun applyAutoTone(values: FloatArray) {
+    /** [MOD] Lightroom 调节面板：从原图重新套用全部调节（避免滑杆叠加累积） */
+    fun applyLightroom(values: com.t8rin.imagetoolbox.feature.single_edit.presentation.components.LightroomValues) {
         componentScope.launch {
-            val src = _bitmap.value ?: return@launch
-            val result = filter(src, listOf(UiAutoToneFilter(value = values))) ?: return@launch
+            val src = _internalBitmap.value ?: _bitmap.value ?: return@launch
+            val filters = buildList {
+                add(UiAutoToneFilter(value = values.tone()))
+                if (values.temperature != 0f || values.tint != 0f) {
+                    add(UiWhiteBalanceFilter(value = (7000f + values.temperature * 30f) to values.tint))
+                }
+                if (values.vibrance != 0f) add(UiVibranceFilter(value = values.vibrance))
+                if (values.saturation != 0f) {
+                    add(UiSaturationFilter(value = (1f + values.saturation / 100f) to true))
+                }
+                if (values.grain != 0f) add(UiGrainFilter(value = values.grain))
+            }
+            val result = filter(src, filters) ?: return@launch
             updateBitmapAfterEditing(result, false)
         }
     }

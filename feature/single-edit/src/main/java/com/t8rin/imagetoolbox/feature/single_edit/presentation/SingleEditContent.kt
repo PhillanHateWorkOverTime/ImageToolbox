@@ -84,6 +84,7 @@ import com.t8rin.imagetoolbox.feature.settings.presentation.components.RawDevelo
 import com.t8rin.imagetoolbox.feature.single_edit.presentation.components.CropEditOption
 import com.t8rin.imagetoolbox.feature.single_edit.presentation.components.LightroomAdjustSheet
 import com.t8rin.imagetoolbox.feature.single_edit.presentation.components.LightroomEditBar
+import com.t8rin.imagetoolbox.feature.single_edit.presentation.components.LightroomValues
 import com.t8rin.imagetoolbox.feature.single_edit.presentation.components.DrawEditOption
 import com.t8rin.imagetoolbox.feature.single_edit.presentation.components.EraseBackgroundEditOption
 import com.t8rin.imagetoolbox.feature.single_edit.presentation.components.FilterEditOption
@@ -269,7 +270,7 @@ fun SingleEditContent(
             var showEditExifDialog by rememberSaveable { mutableStateOf(false) }
             var showMoreSettings by rememberSaveable { mutableStateOf(false) }
             var showLightroomAdjust by rememberSaveable { mutableStateOf(false) }
-            var toneValues by remember { mutableStateOf(floatArrayOf(0f, 0f, 0f, 0f, 0f, 0f)) }
+            var lrValues by remember { mutableStateOf(LightroomValues()) }
             val preset = component.presetSelected
 
             ImageTransformBar(
@@ -285,8 +286,8 @@ fun SingleEditContent(
             // [MOD] Lightroom 风格底部栏：动作 · 预设 · 裁剪 · 编辑 · 蒙版 · 移除
             LightroomEditBar(
                 onAction = {
-                    toneValues = floatArrayOf(0f, 0f, 0f, 0f, 0f, 0f)
-                    component.applyAutoTone(toneValues)
+                    lrValues = LightroomValues()
+                    component.applyLightroom(lrValues)
                 },
                 onPresets = { showMoreSettings = !showMoreSettings },
                 onCrop = { showCropper = true },
@@ -298,18 +299,10 @@ fun SingleEditContent(
             LightroomAdjustSheet(
                 visible = showLightroomAdjust,
                 onDismiss = { showLightroomAdjust = false },
-                values = toneValues,
+                values = lrValues,
                 onValuesChange = {
-                    toneValues = it
-                    component.applyAutoTone(it)
-                },
-                onAuto = {
-                    toneValues = floatArrayOf(0f, 0f, 0f, 0f, 0f, 0f)
-                    component.applyAutoTone(toneValues)
-                },
-                onReset = {
-                    toneValues = floatArrayOf(0f, 0f, 0f, 0f, 0f, 0f)
-                    component.applyAutoTone(toneValues)
+                    lrValues = it
+                    component.applyLightroom(it)
                 }
             )
 
