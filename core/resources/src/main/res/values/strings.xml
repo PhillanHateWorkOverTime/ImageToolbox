@@ -4226,6 +4226,8 @@
     <string name="markup_layers_side_menu_alpha">Menu alpha</string>
     <string name="auto_white_balance">Auto White Balance</string>
     <string name="auto_tone">Auto Tone</string>
+    <string name="tone_whites">Whites</string>
+    <string name="tone_blacks">Blacks</string>
     <string name="clipping">Clipping</string>
     <string name="checking_for_hidden_watermarks">Checking for hidden watermarks</string>
     <string name="storage">Storage</string>
