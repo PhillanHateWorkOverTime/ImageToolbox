@@ -555,6 +555,19 @@ private object ScreenConstantsImpl : ScreenConstants {
             ),
             ScreenGroup(
                 entries = listOf(
+                    // [MOD] 从已移除的「图片」栏移过来的功能
+                    PickColorFromImage(),
+                    RecognizeText(),
+                    Compare(),
+                    CompressionLab(),
+                    DuplicateFinder(),
+                    Gallery,
+                    ImagePreview(),
+                    WallpapersExport,
+                    Base64Tools(),
+                    SvgMaker(),
+                    PaletteTools(),
+                    LoadNetImage(),
                     PdfTools,
                     DocumentScanner,
                     ScanQrCode(),
