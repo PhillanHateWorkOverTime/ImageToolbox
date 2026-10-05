@@ -24,7 +24,7 @@ plugins {
 }
 
 android {
-    val supportedAbi = arrayOf("armeabi-v7a", "arm64-v8a", "x86_64")
+    val supportedAbi = arrayOf("arm64-v8a") // [MOD] 只编 arm64，加快构建
 
     namespace = "com.t8rin.imagetoolbox"
 
