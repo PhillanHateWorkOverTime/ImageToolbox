@@ -555,25 +555,6 @@ private object ScreenConstantsImpl : ScreenConstants {
             ),
             ScreenGroup(
                 entries = listOf(
-                    PickColorFromImage(),
-                    RecognizeText(),
-                    Compare(),
-                    CompressionLab(),
-                    DuplicateFinder(),
-                    Gallery,
-                    ImagePreview(),
-                    WallpapersExport,
-                    Base64Tools(),
-                    SvgMaker(),
-                    PaletteTools(),
-                    LoadNetImage(),
-                ),
-                title = R.string.image,
-                selectedIcon = Icons.Rounded.FileImage,
-                baseIcon = Icons.Outlined.FileImage
-            ),
-            ScreenGroup(
-                entries = listOf(
                     PdfTools,
                     DocumentScanner,
                     ScanQrCode(),
