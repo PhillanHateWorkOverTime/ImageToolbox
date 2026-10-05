@@ -82,6 +82,8 @@ import com.t8rin.imagetoolbox.core.utils.fileSize
 import com.t8rin.imagetoolbox.feature.compare.presentation.components.CompareSheet
 import com.t8rin.imagetoolbox.feature.settings.presentation.components.RawDevelopSettingsCard
 import com.t8rin.imagetoolbox.feature.single_edit.presentation.components.CropEditOption
+import com.t8rin.imagetoolbox.feature.single_edit.presentation.components.LightroomAdjustSheet
+import com.t8rin.imagetoolbox.feature.single_edit.presentation.components.LightroomEditBar
 import com.t8rin.imagetoolbox.feature.single_edit.presentation.components.DrawEditOption
 import com.t8rin.imagetoolbox.feature.single_edit.presentation.components.EraseBackgroundEditOption
 import com.t8rin.imagetoolbox.feature.single_edit.presentation.components.FilterEditOption
@@ -265,7 +267,11 @@ fun SingleEditContent(
         },
         controls = {
             var showEditExifDialog by rememberSaveable { mutableStateOf(false) }
+            var showMoreSettings by rememberSaveable { mutableStateOf(false) }
+            var showLightroomAdjust by rememberSaveable { mutableStateOf(false) }
+            var toneValues by remember { mutableStateOf(floatArrayOf(0f, 0f, 0f, 0f, 0f, 0f)) }
             val preset = component.presetSelected
+
             ImageTransformBar(
                 onEditExif = { showEditExifDialog = true },
                 imageFormat = component.imageInfo.imageFormat,
@@ -275,59 +281,86 @@ fun SingleEditContent(
                 canRotate = !(preset is Preset.AspectRatio && preset.ratio != 1f)
             )
             Spacer(Modifier.size(8.dp))
-            ImageExtraTransformBar(
+
+            // [MOD] Lightroom 风格底部栏：动作 · 预设 · 裁剪 · 编辑 · 蒙版 · 移除
+            LightroomEditBar(
+                onAction = {
+                    toneValues = floatArrayOf(0f, 0f, 0f, 0f, 0f, 0f)
+                    component.applyAutoTone(toneValues)
+                },
+                onPresets = { showMoreSettings = !showMoreSettings },
                 onCrop = { showCropper = true },
-                onFilter = { showFiltering = true },
-                onDraw = { showDrawing = true },
-                onEraseBackground = { showEraseBackground = true },
-                onApplyCurves = { showApplyCurves = true }
+                onEdit = { showLightroomAdjust = true },
+                onMask = { showFiltering = true },
+                onRemove = { showEraseBackground = true }
             )
-            Spacer(Modifier.size(16.dp))
-            RawDevelopSettingsCard(
-                uri = component.currentImageUriString()?.toUri(),
-                onSettingsChanged = component::calculatePreview
+
+            LightroomAdjustSheet(
+                visible = showLightroomAdjust,
+                onDismiss = { showLightroomAdjust = false },
+                values = toneValues,
+                onValuesChange = {
+                    toneValues = it
+                    component.applyAutoTone(it)
+                },
+                onAuto = {
+                    toneValues = floatArrayOf(0f, 0f, 0f, 0f, 0f, 0f)
+                    component.applyAutoTone(toneValues)
+                },
+                onReset = {
+                    toneValues = floatArrayOf(0f, 0f, 0f, 0f, 0f, 0f)
+                    component.applyAutoTone(toneValues)
+                }
             )
-            PresetSelector(
-                value = component.presetSelected,
-                includeTelegramOption = true,
-                includeAspectRatioOption = true,
-                onValueChange = component::updateProfile,
-                imageInfo = imageInfo,
-                imageExportProfilesHolder = component
-            )
-            Spacer(Modifier.size(8.dp))
-            ResizeImageField(
-                imageInfo = imageInfo,
-                originalSize = component.originalSize,
-                onHeightChange = component::updateHeight,
-                onWidthChange = component::updateWidth,
-                showWarning = component.showWarning
-            )
-            if (imageInfo.imageFormat.canChangeCompressionValue) Spacer(
-                Modifier.height(8.dp)
-            )
-            QualitySelector(
-                imageFormat = imageInfo.imageFormat,
-                quality = imageInfo.quality,
-                onQualityChange = component::setQuality
-            )
-            Spacer(Modifier.height(8.dp))
-            ImageFormatSelector(
-                value = imageInfo.imageFormat,
-                onValueChange = component::setImageFormat,
-                quality = imageInfo.quality,
-            )
-            Spacer(Modifier.height(8.dp))
-            ResizeTypeSelector(
-                enabled = component.bitmap != null,
-                value = imageInfo.resizeType,
-                onValueChange = component::setResizeType
-            )
-            Spacer(Modifier.height(8.dp))
-            ScaleModeSelector(
-                value = imageInfo.imageScaleMode,
-                onValueChange = component::setImageScaleMode
-            )
+
+            if (showMoreSettings) {
+                Spacer(Modifier.size(8.dp))
+                RawDevelopSettingsCard(
+                    uri = component.currentImageUriString()?.toUri(),
+                    onSettingsChanged = component::calculatePreview
+                )
+                PresetSelector(
+                    value = component.presetSelected,
+                    includeTelegramOption = true,
+                    includeAspectRatioOption = true,
+                    onValueChange = component::updateProfile,
+                    imageInfo = imageInfo,
+                    imageExportProfilesHolder = component
+                )
+                Spacer(Modifier.size(8.dp))
+                ResizeImageField(
+                    imageInfo = imageInfo,
+                    originalSize = component.originalSize,
+                    onHeightChange = component::updateHeight,
+                    onWidthChange = component::updateWidth,
+                    showWarning = component.showWarning
+                )
+                if (imageInfo.imageFormat.canChangeCompressionValue) Spacer(
+                    Modifier.height(8.dp)
+                )
+                QualitySelector(
+                    imageFormat = imageInfo.imageFormat,
+                    quality = imageInfo.quality,
+                    onQualityChange = component::setQuality
+                )
+                Spacer(Modifier.height(8.dp))
+                ImageFormatSelector(
+                    value = imageInfo.imageFormat,
+                    onValueChange = component::setImageFormat,
+                    quality = imageInfo.quality,
+                )
+                Spacer(Modifier.height(8.dp))
+                ResizeTypeSelector(
+                    enabled = component.bitmap != null,
+                    value = imageInfo.resizeType,
+                    onValueChange = component::setResizeType
+                )
+                Spacer(Modifier.height(8.dp))
+                ScaleModeSelector(
+                    value = imageInfo.imageScaleMode,
+                    onValueChange = component::setImageScaleMode
+                )
+            }
 
             EditExifSheet(
                 visible = showEditExifDialog,

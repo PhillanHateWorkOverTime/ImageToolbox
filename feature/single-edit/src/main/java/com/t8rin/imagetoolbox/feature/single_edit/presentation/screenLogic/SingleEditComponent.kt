@@ -63,6 +63,7 @@ import com.t8rin.imagetoolbox.core.domain.utils.smartJob
 import com.t8rin.imagetoolbox.core.domain.utils.update
 import com.t8rin.imagetoolbox.core.filters.domain.FilterProvider
 import com.t8rin.imagetoolbox.core.filters.domain.model.Filter
+import com.t8rin.imagetoolbox.core.filters.presentation.model.UiAutoToneFilter
 import com.t8rin.imagetoolbox.core.filters.presentation.model.UiFilter
 import com.t8rin.imagetoolbox.core.filters.presentation.widget.FilterTemplateCreationSheetComponent
 import com.t8rin.imagetoolbox.core.filters.presentation.widget.addFilters.AddFiltersSheetComponent
@@ -916,6 +917,15 @@ class SingleEditComponent @AssistedInject internal constructor(
 
     fun clearFilterList() {
         _filterList.update { listOf() }
+    }
+
+    /** [MOD] Lightroom「光」面板：把 6 个影调值（偏移量）即时应用到当前位图 */
+    fun applyAutoTone(values: FloatArray) {
+        componentScope.launch {
+            val src = _bitmap.value ?: return@launch
+            val result = filter(src, listOf(UiAutoToneFilter(value = values))) ?: return@launch
+            updateBitmapAfterEditing(result, false)
+        }
     }
 
     fun clearDrawing(canUndo: Boolean = false) {
