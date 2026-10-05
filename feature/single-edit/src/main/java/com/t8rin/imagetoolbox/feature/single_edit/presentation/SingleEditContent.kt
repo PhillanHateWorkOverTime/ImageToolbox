@@ -299,15 +299,7 @@ fun SingleEditContent(
             var showMoreSettings by rememberSaveable { mutableStateOf(false) }
             val preset = component.presetSelected
 
-            ImageTransformBar(
-                onEditExif = { showEditExifDialog = true },
-                imageFormat = component.imageInfo.imageFormat,
-                onRotateLeft = component::rotateBitmapLeft,
-                onFlip = component::flipImage,
-                onRotateRight = component::rotateBitmapRight,
-                canRotate = !(preset is Preset.AspectRatio && preset.ratio != 1f)
-            )
-            Spacer(Modifier.size(8.dp))
+            // [MOD] 旋转/翻转/EXIF 已收进「预设」展开区，主界面只留 Lightroom 那排
 
             // [MOD] Lightroom 风格底部栏：动作 · 预设 · 裁剪 · 编辑 · 蒙版 · 移除
             LightroomEditBar(
@@ -324,6 +316,15 @@ fun SingleEditContent(
             )
 
             if (showMoreSettings) {
+                Spacer(Modifier.size(8.dp))
+                ImageTransformBar(
+                    onEditExif = { showEditExifDialog = true },
+                    imageFormat = component.imageInfo.imageFormat,
+                    onRotateLeft = component::rotateBitmapLeft,
+                    onFlip = component::flipImage,
+                    onRotateRight = component::rotateBitmapRight,
+                    canRotate = !(preset is Preset.AspectRatio && preset.ratio != 1f)
+                )
                 Spacer(Modifier.size(8.dp))
                 RawDevelopSettingsCard(
                     uri = component.currentImageUriString()?.toUri(),
