@@ -85,6 +85,7 @@ import com.t8rin.imagetoolbox.feature.single_edit.presentation.components.CropEd
 import com.t8rin.imagetoolbox.feature.single_edit.presentation.components.LightroomAdjustSheet
 import com.t8rin.imagetoolbox.feature.single_edit.presentation.components.LightroomEditBar
 import com.t8rin.imagetoolbox.feature.single_edit.presentation.components.LightroomValues
+import com.t8rin.imagetoolbox.feature.single_edit.presentation.components.PhotoGrid
 import com.t8rin.imagetoolbox.feature.single_edit.presentation.components.DrawEditOption
 import com.t8rin.imagetoolbox.feature.single_edit.presentation.components.EraseBackgroundEditOption
 import com.t8rin.imagetoolbox.feature.single_edit.presentation.components.FilterEditOption
@@ -405,7 +406,8 @@ fun SingleEditContent(
         canShowScreenData = component.bitmap != null,
         noDataControls = {
             if (!component.isImageLoading) {
-                ImageNotPickedWidget(onPickImage = pickImage)
+                // [MOD] 首页 = 相册照片网格，点一张直接进编辑
+                PhotoGrid(onPick = { uri -> component.setUri(uri) })
             }
         },
         forceImagePreviewToMax = showOriginal
