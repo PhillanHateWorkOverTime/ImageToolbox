@@ -83,7 +83,8 @@ object PaddleOCR : NeuralTool() {
     private fun modelDirectory(model: Model): File = File(directory, model.name).apply(File::mkdirs)
 
     private fun modelUrl(model: Model): String =
-        "https://huggingface.co/T8RIN/imagetoolbox-models/resolve/main/paddleocr/${model.fileName}?download=true"
+        // [MOD] PaddleOCR 模型同样走国内镜像
+        "https://hf-mirror.com/T8RIN/imagetoolbox-models/resolve/main/paddleocr/${model.fileName}?download=true"
 
     private fun modelFiles(model: Model): ModelFiles? {
         fun resolveFrom(folder: File): ModelFiles? {

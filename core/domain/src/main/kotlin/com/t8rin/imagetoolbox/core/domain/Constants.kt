@@ -36,7 +36,8 @@ const val APP_CHANGELOG = "$APP_RELEASES.atom"
 const val RES_HOST = "$AUTHOR_GITHUB/ImageToolboxRemoteResources"
 const val LENS_PROFILES_LINK = "$RES_HOST/tree/main/lens_profile"
 const val RES_BASE_URL = "$RES_HOST/raw/refs/heads/main/*"
-const val HF_BASE_URL = "https://huggingface.co/T8RIN/imagetoolbox-models/resolve/main/*"
+// [MOD] 走国内镜像，避免 huggingface.co 被墙导致模型下载失败
+const val HF_BASE_URL = "https://hf-mirror.com/T8RIN/imagetoolbox-models/resolve/main/*"
 
 
 const val GLOBAL_STORAGE_NAME = "image_resizer"
