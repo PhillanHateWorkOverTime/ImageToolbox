@@ -39,7 +39,7 @@ jobs:
             gradle-build-cache-
 
       - name: Build FOSS APKs (unsigned)
-        run: bash ./gradlew assembleFossRelease --build-cache -x lint -x test
+        run: bash ./gradlew assembleFossRelease --build-cache --max-workers=2
 
       - name: Set up Keystore
         run: |
