@@ -94,9 +94,9 @@ fun LightroomAdjustSheet(
     onCancel: () -> Unit
 ) {
     if (!visible) return
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
     var group by remember { mutableStateOf(0) }
-    val groups = listOf("光" to LIGHT_SLIDERS, "颜色" to COLOR_SLIDERS, "效果" to EFFECTS_SLIDERS)
+    val groups = listOf("亮度" to LIGHT_SLIDERS, "颜色" to COLOR_SLIDERS, "效果" to EFFECTS_SLIDERS)
 
     ModalBottomSheet(
         onDismissRequest = onDismiss,
@@ -105,6 +105,7 @@ fun LightroomAdjustSheet(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
+                .fillMaxHeight(0.42f)
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 20.dp)
                 .padding(bottom = 28.dp)
@@ -146,8 +147,7 @@ fun LightroomAdjustSheet(
                     Button(
                         onClick = { onValuesChange(LightroomValues()) }
                     ) { Text("自动") }
-                }
-                Spacer(Modifier.width(6.dp))
+                }                Spacer(Modifier.width(6.dp))
                 OutlinedButton(
                     onClick = {
                         val zero = LightroomValues()
