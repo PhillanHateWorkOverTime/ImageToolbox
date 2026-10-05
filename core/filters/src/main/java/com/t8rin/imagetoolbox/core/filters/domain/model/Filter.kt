@@ -444,6 +444,7 @@ interface Filter<Value : Any> : VisibilityOwner, ErrorOwner {
     interface Ripple : QuadFloatFilter
     interface AdaptiveBlur : PairFloatFilter
     interface AutoWhiteBalance : PairFloatFilter
+    interface AutoTone : FloatFilter
     interface Isophotes : GmicFilter
     interface LocalOrientation : GmicFilter
     interface Skeleton : GmicFilter
