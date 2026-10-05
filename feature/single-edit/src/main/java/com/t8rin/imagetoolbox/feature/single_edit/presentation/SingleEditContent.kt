@@ -18,6 +18,7 @@
 package com.t8rin.imagetoolbox.feature.single_edit.presentation
 
 import android.net.Uri
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
@@ -149,6 +150,9 @@ fun SingleEditContent(
     var showDrawing by rememberSaveable { mutableStateOf(false) }
     var showEraseBackground by rememberSaveable { mutableStateOf(false) }
     var showApplyCurves by rememberSaveable { mutableStateOf(false) }
+    // [MOD] Lightroom 调节面板状态（提到这里，才能浮在照片上）
+    var showLightroomAdjust by rememberSaveable { mutableStateOf(false) }
+    var lrValues by remember { mutableStateOf(LightroomValues()) }
 
 
     AdaptiveLayoutScreen(
@@ -258,20 +262,41 @@ fun SingleEditContent(
             }
         },
         imagePreview = {
-            ImageContainer(
-                imageInside = isPortrait,
-                showOriginal = showOriginal,
-                previewBitmap = component.lightroomPreview ?: component.previewBitmap,
-                originalBitmap = component.initialBitmap,
-                isLoading = component.isImageLoading,
-                shouldShowPreview = component.shouldShowPreview
-            )
+            Box {
+                ImageContainer(
+                    imageInside = isPortrait,
+                    showOriginal = showOriginal,
+                    previewBitmap = component.lightroomPreview ?: component.previewBitmap,
+                    originalBitmap = component.initialBitmap,
+                    isLoading = component.isImageLoading,
+                    shouldShowPreview = component.shouldShowPreview
+                )
+                // [MOD] 半透明调节面板，浮在照片上（照片铺满屏）
+                LightroomAdjustSheet(
+                    visible = showLightroomAdjust,
+                    onDismiss = {
+                        showLightroomAdjust = false
+                        component.discardLightroom()
+                    },
+                    values = lrValues,
+                    onValuesChange = {
+                        lrValues = it
+                        component.previewLightroom(it)
+                    },
+                    onCommit = {
+                        showLightroomAdjust = false
+                        component.commitLightroom(lrValues)
+                    },
+                    onCancel = {
+                        lrValues = LightroomValues()
+                        component.discardLightroom()
+                    }
+                )
+            }
         },
         controls = {
             var showEditExifDialog by rememberSaveable { mutableStateOf(false) }
             var showMoreSettings by rememberSaveable { mutableStateOf(false) }
-            var showLightroomAdjust by rememberSaveable { mutableStateOf(false) }
-            var lrValues by remember { mutableStateOf(LightroomValues()) }
             val preset = component.presetSelected
 
             ImageTransformBar(
@@ -296,27 +321,6 @@ fun SingleEditContent(
                 onEdit = { showLightroomAdjust = true },
                 onMask = { showFiltering = true },
                 onRemove = { showEraseBackground = true }
-            )
-
-            LightroomAdjustSheet(
-                visible = showLightroomAdjust,
-                onDismiss = {
-                    showLightroomAdjust = false
-                    component.discardLightroom()
-                },
-                values = lrValues,
-                onValuesChange = {
-                    lrValues = it
-                    component.previewLightroom(it)
-                },
-                onCommit = {
-                    showLightroomAdjust = false
-                    component.commitLightroom(lrValues)
-                },
-                onCancel = {
-                    lrValues = LightroomValues()
-                    component.discardLightroom()
-                }
             )
 
             if (showMoreSettings) {
@@ -422,7 +426,7 @@ fun SingleEditContent(
                 PhotoGrid(onPick = { uri -> component.setUri(uri) })
             }
         },
-        forceImagePreviewToMax = showOriginal
+        forceImagePreviewToMax = true
     )
 
     ResetDialog(
