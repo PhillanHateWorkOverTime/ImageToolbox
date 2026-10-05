@@ -445,7 +445,6 @@ interface Filter<Value : Any> : VisibilityOwner, ErrorOwner {
     interface AdaptiveBlur : PairFloatFilter
     interface AutoWhiteBalance : PairFloatFilter
     interface AutoTone : FloatArrayFilter
-    interface AutoTone : FloatFilter
     interface Isophotes : GmicFilter
     interface LocalOrientation : GmicFilter
     interface Skeleton : GmicFilter
