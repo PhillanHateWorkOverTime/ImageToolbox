@@ -89,7 +89,9 @@ fun LightroomAdjustSheet(
     visible: Boolean,
     onDismiss: () -> Unit,
     values: LightroomValues,
-    onValuesChange: (LightroomValues) -> Unit
+    onValuesChange: (LightroomValues) -> Unit,
+    onCommit: () -> Unit,
+    onCancel: () -> Unit
 ) {
     if (!visible) return
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -196,10 +198,25 @@ fun LightroomAdjustSheet(
             }
 
             Spacer(Modifier.height(10.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                OutlinedButton(
+                    onClick = onCancel,
+                    modifier = Modifier.weight(1f)
+                ) { Text("取消") }
+                Button(
+                    onClick = onCommit,
+                    modifier = Modifier.weight(1f)
+                ) { Text("✓ 应用") }
+            }
+
+            Spacer(Modifier.height(8.dp))
             Text(
                 text = if (group == 0)
                     "「光」全 0 = 纯自动影调（自动压高光、提暗部）"
-                else "拖动滑杆即时应用",
+                else "拖动滑杆即时预览（小图），点「应用」才写入原分辨率",
                 fontSize = 11.sp,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )

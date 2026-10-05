@@ -261,7 +261,7 @@ fun SingleEditContent(
             ImageContainer(
                 imageInside = isPortrait,
                 showOriginal = showOriginal,
-                previewBitmap = component.previewBitmap,
+                previewBitmap = component.lightroomPreview ?: component.previewBitmap,
                 originalBitmap = component.initialBitmap,
                 isLoading = component.isImageLoading,
                 shouldShowPreview = component.shouldShowPreview
@@ -288,7 +288,8 @@ fun SingleEditContent(
             LightroomEditBar(
                 onAction = {
                     lrValues = LightroomValues()
-                    component.applyLightroom(lrValues)
+                    showLightroomAdjust = true
+                    component.previewLightroom(lrValues)
                 },
                 onPresets = { showMoreSettings = !showMoreSettings },
                 onCrop = { showCropper = true },
@@ -299,11 +300,22 @@ fun SingleEditContent(
 
             LightroomAdjustSheet(
                 visible = showLightroomAdjust,
-                onDismiss = { showLightroomAdjust = false },
+                onDismiss = {
+                    showLightroomAdjust = false
+                    component.discardLightroom()
+                },
                 values = lrValues,
                 onValuesChange = {
                     lrValues = it
-                    component.applyLightroom(it)
+                    component.previewLightroom(it)
+                },
+                onCommit = {
+                    showLightroomAdjust = false
+                    component.commitLightroom(lrValues)
+                },
+                onCancel = {
+                    lrValues = LightroomValues()
+                    component.discardLightroom()
                 }
             )
 

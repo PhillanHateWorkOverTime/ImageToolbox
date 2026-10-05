@@ -923,24 +923,68 @@ class SingleEditComponent @AssistedInject internal constructor(
         _filterList.update { listOf() }
     }
 
-    /** [MOD] Lightroom 调节面板：从原图重新套用全部调节（避免滑杆叠加累积） */
-    fun applyLightroom(values: com.t8rin.imagetoolbox.feature.single_edit.presentation.components.LightroomValues) {
-        componentScope.launch {
-            val src = _internalBitmap.value ?: _bitmap.value ?: return@launch
-            val filters = buildList {
-                add(UiAutoToneFilter(value = values.tone()))
-                if (values.temperature != 0f || values.tint != 0f) {
-                    add(UiWhiteBalanceFilter(value = (7000f + values.temperature * 30f) to values.tint))
-                }
-                if (values.vibrance != 0f) add(UiVibranceFilter(value = values.vibrance))
-                if (values.saturation != 0f) {
-                    add(UiSaturationFilter(value = (1f + values.saturation / 100f) to true))
-                }
-                if (values.grain != 0f) add(UiGrainFilter(value = values.grain))
-            }
-            val result = filter(src, filters) ?: return@launch
-            updateBitmapAfterEditing(result, false)
+    // ---- [MOD] Lightroom 调节面板：小图实时预览 + 确认后全分辨率应用 ----
+
+    private val _lightroomPreview: MutableState<Bitmap?> = mutableStateOf(null)
+    val lightroomPreview: Bitmap? by _lightroomPreview
+
+    private var lightroomJob: Job? = null
+    private var lightroomScaledSource: Bitmap? = null
+
+    private fun lightroomFilters(
+        values: com.t8rin.imagetoolbox.feature.single_edit.presentation.components.LightroomValues
+    ): List<Filter<*>> = buildList {
+        add(UiAutoToneFilter(value = values.tone()))
+        if (values.temperature != 0f || values.tint != 0f) {
+            add(UiWhiteBalanceFilter(value = (7000f + values.temperature * 30f) to values.tint))
         }
+        if (values.vibrance != 0f) add(UiVibranceFilter(value = values.vibrance))
+        if (values.saturation != 0f) {
+            add(UiSaturationFilter(value = (1f + values.saturation / 100f) to true))
+        }
+        if (values.grain != 0f) add(UiGrainFilter(value = values.grain))
+    }
+
+    /** 拖动滑杆时调：只在小图（长边 ≤1280）上算，快且不爆内存 */
+    fun previewLightroom(
+        values: com.t8rin.imagetoolbox.feature.single_edit.presentation.components.LightroomValues
+    ) {
+        val original = _internalBitmap.value ?: _bitmap.value ?: return
+        lightroomJob?.cancel()
+        lightroomJob = componentScope.launch {
+            val scaled = lightroomScaledSource ?: run {
+                val longEdge = maxOf(original.width, original.height)
+                val ratio = if (longEdge > 1280) 1280f / longEdge else 1f
+                Bitmap.createScaledBitmap(
+                    original,
+                    (original.width * ratio).toInt().coerceAtLeast(1),
+                    (original.height * ratio).toInt().coerceAtLeast(1),
+                    true
+                ).also { lightroomScaledSource = it }
+            }
+            delay(50)
+            val out = filter(scaled, lightroomFilters(values))
+            _lightroomPreview.value = out
+        }
+    }
+
+    /** 点「应用」时调：在全分辨率原图上算一次并提交 */
+    fun commitLightroom(
+        values: com.t8rin.imagetoolbox.feature.single_edit.presentation.components.LightroomValues
+    ) {
+        lightroomJob?.cancel()
+        componentScope.launch {
+            val original = _internalBitmap.value ?: return@launch
+            val out = filter(original, lightroomFilters(values)) ?: return@launch
+            _lightroomPreview.value = null
+            updateBitmapAfterEditing(out, false)
+        }
+    }
+
+    /** 放弃本次 Lightroom 调节（不提交） */
+    fun discardLightroom() {
+        lightroomJob?.cancel()
+        _lightroomPreview.value = null
     }
 
     fun clearDrawing(canUndo: Boolean = false) {
