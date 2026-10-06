@@ -427,7 +427,8 @@ fun SingleEditContent(
                 PhotoGrid(onPick = { uri -> component.setUri(uri) })
             }
         },
-        forceImagePreviewToMax = true
+        // [MOD] 不要强制照片满屏 —— 满屏会把下面的编辑选项顶出屏幕，点不到
+        forceImagePreviewToMax = showOriginal
     )
 
     ResetDialog(
