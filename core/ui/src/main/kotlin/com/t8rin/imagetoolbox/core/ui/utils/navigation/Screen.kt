@@ -341,7 +341,6 @@ sealed class Screen(
                 DarkMode(),
                 Metadata(),
                 ExtractImages(),
-                OCR(),
                 ZipConvert(),
                 PdfContactSheet(),
                 PalettePdfTool(),

@@ -509,7 +509,7 @@ internal interface ScreenConstants {
 
 private object ScreenConstantsImpl : ScreenConstants {
     override val typedEntries by lazy {
-        // [MOD] 大幅精简：只保留 照片编辑 / AI 工具 / PDF 工具
+        // [MOD] 最终精简：照片编辑 / AI 工具 / PDF+扫描
         listOf(
             ScreenGroup(
                 entries = listOf(
@@ -518,6 +518,11 @@ private object ScreenConstantsImpl : ScreenConstants {
                     FormatConversion(),
                     Crop(),
                     ImageCutter(),
+                    WeightResize(),
+                    LimitResize(),
+                    EditExif(),
+                    DeleteExif(),
+                    BatchRename(),
                 ),
                 title = R.string.edit,
                 selectedIcon = Icons.Rounded.MiniEditLarge,
@@ -533,6 +538,7 @@ private object ScreenConstantsImpl : ScreenConstants {
             ),
             ScreenGroup(
                 entries = listOf(
+                    DocumentScanner,
                     PdfTools,
                 ),
                 title = R.string.pdf_tools,

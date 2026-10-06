@@ -277,7 +277,15 @@ fun SingleEditContent(
                 onCrop = { showCropper = true },
                 onTone = {
                     showLightroomAdjust = true
-                    component.previewLightroom(lrValues)
+                    if (lrValues.isDefault) {
+                        // [MOD] 一进来就套「自动影调」（跟之前效果好的那版一致），滑杆同步显示
+                        component.computeAutoTone { auto ->
+                            lrValues = auto
+                            component.previewLightroom(auto)
+                        }
+                    } else {
+                        component.previewLightroom(lrValues)
+                    }
                 },
                 onMask = { showFiltering = true },
                 onRemove = { showEraseBackground = true }
