@@ -238,7 +238,8 @@ data class SettingsState(
                 generatePreviews = true,
                 enableSheetGestures = false,
                 sheetNestedScrollEnabled = false,
-                showSettingsInLandscape = true,
+                // [MOD] 默认关掉：平板横屏不再把「设置」常驻成半边侧栏
+                showSettingsInLandscape = false,
                 useFullscreenSettings = false,
                 allowCollapsingSettingsGroups = false,
                 switchType = SwitchType.Compose,
