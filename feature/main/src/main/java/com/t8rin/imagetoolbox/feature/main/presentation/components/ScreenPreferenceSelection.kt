@@ -93,6 +93,7 @@ import com.t8rin.imagetoolbox.core.ui.widget.enhanced.EnhancedIconButton
 import com.t8rin.imagetoolbox.core.ui.widget.enhanced.enhancedFlingBehavior
 import com.t8rin.imagetoolbox.core.ui.widget.modifier.ShapeDefaults
 import com.t8rin.imagetoolbox.core.ui.widget.other.BoxAnimatedVisibility
+import com.t8rin.imagetoolbox.core.ui.widget.photo_gallery.HomePhotoGallery
 import com.t8rin.imagetoolbox.core.ui.widget.preferences.PreferenceItemOverload
 import com.t8rin.imagetoolbox.core.utils.getString
 
@@ -109,7 +110,9 @@ internal fun RowScope.ScreenPreferenceSelection(
     onChangeShowScreenSearch: (Boolean) -> Unit,
     onToggleFavorite: (Screen) -> Unit,
     showNavRail: Boolean,
-    lastUsedTools: List<UiLastUsedTool>
+    lastUsedTools: List<UiLastUsedTool>,
+    // [MOD] 一级首页 = 纯相册（编辑 tab 落地页）
+    showHomeGallery: Boolean = false
 ) {
     val settingsState = LocalSettingsState.current
     val cutout = WindowInsets.displayCutout.asPaddingValues()
@@ -197,6 +200,14 @@ internal fun RowScope.ScreenPreferenceSelection(
                             contentPadding = contentPadding,
                             onToggleFavorite = onToggleFavorite,
                             lastUsedTools = lastUsedTools
+                        )
+                    } else if (showHomeGallery && !isSearching) {
+                        // [MOD] 首页 = 相册网格；点一张照片直接进编辑器
+                        HomePhotoGallery(
+                            contentPadding = contentPadding,
+                            onPick = { uri ->
+                                onNavigateToScreenWithPopUpTo(Screen.SingleEdit(uri = uri))
+                            }
                         )
                     } else {
                         LazyVerticalStaggeredGrid(

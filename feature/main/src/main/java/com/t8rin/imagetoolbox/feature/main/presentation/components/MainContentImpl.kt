@@ -267,6 +267,12 @@ internal fun MainContentImpl(
                     }
                 }
 
+                // [MOD] 一级首页（编辑 tab 落地页）= 纯相册，保留其它 tab 不变
+                val showHomeGallery =
+                    settingsState.groupOptionsByTypes &&
+                            !showFavoriteTabInGroupedMode &&
+                            selectedNavigationItem == 0
+
                 ScreenPreferenceSelection(
                     currentScreenList = currentScreenList,
                     showScreenSearch = showScreenSearch,
@@ -281,7 +287,8 @@ internal fun MainContentImpl(
                     onNavigateToScreenWithPopUpTo = onNavigate,
                     onNavigationBarItemChange = { selectedNavigationItem = it },
                     onToggleFavorite = onToggleFavorite,
-                    lastUsedTools = lastUsedTools
+                    lastUsedTools = lastUsedTools,
+                    showHomeGallery = showHomeGallery
                 )
             }
         }
