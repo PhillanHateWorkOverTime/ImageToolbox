@@ -932,9 +932,15 @@ class SingleEditComponent @AssistedInject internal constructor(
     private var lightroomScaledSource: Bitmap? = null
 
     private fun lightroomFilters(
+        src: Bitmap,
         values: com.t8rin.imagetoolbox.feature.single_edit.presentation.components.LightroomValues
     ): List<Filter<*>> = buildList {
-        add(UiAutoToneFilter(value = values.tone()))
+        // 滑杆上的值 = 绝对影调值；滤镜要的是「相对自动结果的偏移」，
+        // 所以先分析出这张图的自动值，再传 (目标 - 自动)，结果正好等于滑杆(所见即所得)
+        val auto = com.t8rin.imagetoolbox.feature.single_edit.presentation.components
+            .LightroomToneAnalyzer.autoValues(src)
+        val target = values.tone()
+        add(UiAutoToneFilter(value = FloatArray(6) { target[it] - auto[it] }))
         if (values.temperature != 0f || values.tint != 0f) {
             add(UiWhiteBalanceFilter(value = (7000f + values.temperature * 30f) to values.tint))
         }
@@ -963,7 +969,7 @@ class SingleEditComponent @AssistedInject internal constructor(
                 ).also { lightroomScaledSource = it }
             }
             delay(50)
-            val out = filter(scaled, lightroomFilters(values))
+            val out = filter(scaled, lightroomFilters(scaled, values))
             _lightroomPreview.value = out
         }
     }
@@ -975,9 +981,33 @@ class SingleEditComponent @AssistedInject internal constructor(
         lightroomJob?.cancel()
         componentScope.launch {
             val original = _internalBitmap.value ?: return@launch
-            val out = filter(original, lightroomFilters(values)) ?: return@launch
+            val out = filter(original, lightroomFilters(original, values)) ?: return@launch
             _lightroomPreview.value = null
             updateBitmapAfterEditing(out, false)
+        }
+    }
+
+    /** 「自动」：分析当前图片，把算出来的 6 个影调值交回 UI 填进滑杆 */
+    fun computeAutoTone(
+        onResult: (com.t8rin.imagetoolbox.feature.single_edit.presentation.components.LightroomValues) -> Unit
+    ) {
+        lightroomJob?.cancel()
+        lightroomJob = componentScope.launch {
+            val src = lightroomScaledSource ?: _internalBitmap.value ?: _bitmap.value
+                ?: return@launch
+            val a = com.t8rin.imagetoolbox.feature.single_edit.presentation.components
+                .LightroomToneAnalyzer.autoValues(src)
+            onResult(
+                com.t8rin.imagetoolbox.feature.single_edit.presentation.components
+                    .LightroomValues(
+                        exposure = a[0],
+                        contrast = a[1],
+                        highlights = a[2],
+                        shadows = a[3],
+                        whites = a[4],
+                        blacks = a[5]
+                    )
+            )
         }
     }
 

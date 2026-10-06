@@ -1,7 +1,8 @@
 /*
- * [MOD] Lightroom 风格底部编辑栏：动作 · 预设 · 裁剪 · 编辑 · 蒙版 · 移除
+ * [MOD] Lightroom 风格底部编辑栏
  *
- * 6 个等宽按钮铺满一行（不横向滚动、不做胶囊底），点哪是哪。
+ * 按用户要求精简为 4 项：裁剪 · 影调 · 蒙版 · 移除
+ * （原先的「动作」「预设」已删除）
  */
 
 package com.t8rin.imagetoolbox.feature.single_edit.presentation.components
@@ -27,19 +28,15 @@ import androidx.compose.ui.unit.sp
 
 @Composable
 fun LightroomEditBar(
-    onAction: () -> Unit,
-    onPresets: () -> Unit,
     onCrop: () -> Unit,
-    onEdit: () -> Unit,
+    onTone: () -> Unit,
     onMask: () -> Unit,
     onRemove: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val items = listOf<Pair<String, () -> Unit>>(
-        "动作" to onAction,
-        "预设" to onPresets,
         "裁剪" to onCrop,
-        "编辑" to onEdit,
+        "影调" to onTone,
         "蒙版" to onMask,
         "移除" to onRemove
     )

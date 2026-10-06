@@ -262,126 +262,25 @@ fun SingleEditContent(
             }
         },
         imagePreview = {
-            Box {
-                ImageContainer(
-                    imageInside = isPortrait,
-                    showOriginal = showOriginal,
-                    previewBitmap = component.lightroomPreview ?: component.previewBitmap,
-                    originalBitmap = component.initialBitmap,
-                    isLoading = component.isImageLoading,
-                    shouldShowPreview = component.shouldShowPreview
-                )
-                // [MOD] 半透明调节面板，浮在照片上（照片铺满屏）
-                LightroomAdjustSheet(
-                    visible = showLightroomAdjust,
-                    onDismiss = {
-                        showLightroomAdjust = false
-                        component.discardLightroom()
-                    },
-                    values = lrValues,
-                    onValuesChange = {
-                        lrValues = it
-                        component.previewLightroom(it)
-                    },
-                    onCommit = {
-                        showLightroomAdjust = false
-                        component.commitLightroom(lrValues)
-                    },
-                    onCancel = {
-                        lrValues = LightroomValues()
-                        component.discardLightroom()
-                    }
-                )
-            }
+            ImageContainer(
+                imageInside = isPortrait,
+                showOriginal = showOriginal,
+                previewBitmap = component.lightroomPreview ?: component.previewBitmap,
+                originalBitmap = component.initialBitmap,
+                isLoading = component.isImageLoading,
+                shouldShowPreview = component.shouldShowPreview
+            )
         },
         controls = {
-            var showEditExifDialog by rememberSaveable { mutableStateOf(false) }
-            var showMoreSettings by rememberSaveable { mutableStateOf(false) }
-            val preset = component.presetSelected
-
-            // [MOD] 旋转/翻转/EXIF 已收进「预设」展开区，主界面只留 Lightroom 那排
-
-            // [MOD] Lightroom 风格底部栏：动作 · 预设 · 裁剪 · 编辑 · 蒙版 · 移除
+            // [MOD] Lightroom 风格底部栏（按要求精简）：裁剪 · 影调 · 蒙版 · 移除
             LightroomEditBar(
-                onAction = {
-                    lrValues = LightroomValues()
+                onCrop = { showCropper = true },
+                onTone = {
                     showLightroomAdjust = true
                     component.previewLightroom(lrValues)
                 },
-                onPresets = { showMoreSettings = !showMoreSettings },
-                onCrop = { showCropper = true },
-                onEdit = { showLightroomAdjust = true },
                 onMask = { showFiltering = true },
                 onRemove = { showEraseBackground = true }
-            )
-
-            if (showMoreSettings) {
-                Spacer(Modifier.size(8.dp))
-                ImageTransformBar(
-                    onEditExif = { showEditExifDialog = true },
-                    imageFormat = component.imageInfo.imageFormat,
-                    onRotateLeft = component::rotateBitmapLeft,
-                    onFlip = component::flipImage,
-                    onRotateRight = component::rotateBitmapRight,
-                    canRotate = !(preset is Preset.AspectRatio && preset.ratio != 1f)
-                )
-                Spacer(Modifier.size(8.dp))
-                RawDevelopSettingsCard(
-                    uri = component.currentImageUriString()?.toUri(),
-                    onSettingsChanged = component::calculatePreview
-                )
-                PresetSelector(
-                    value = component.presetSelected,
-                    includeTelegramOption = true,
-                    includeAspectRatioOption = true,
-                    onValueChange = component::updateProfile,
-                    imageInfo = imageInfo,
-                    imageExportProfilesHolder = component
-                )
-                Spacer(Modifier.size(8.dp))
-                ResizeImageField(
-                    imageInfo = imageInfo,
-                    originalSize = component.originalSize,
-                    onHeightChange = component::updateHeight,
-                    onWidthChange = component::updateWidth,
-                    showWarning = component.showWarning
-                )
-                if (imageInfo.imageFormat.canChangeCompressionValue) Spacer(
-                    Modifier.height(8.dp)
-                )
-                QualitySelector(
-                    imageFormat = imageInfo.imageFormat,
-                    quality = imageInfo.quality,
-                    onQualityChange = component::setQuality
-                )
-                Spacer(Modifier.height(8.dp))
-                ImageFormatSelector(
-                    value = imageInfo.imageFormat,
-                    onValueChange = component::setImageFormat,
-                    quality = imageInfo.quality,
-                )
-                Spacer(Modifier.height(8.dp))
-                ResizeTypeSelector(
-                    enabled = component.bitmap != null,
-                    value = imageInfo.resizeType,
-                    onValueChange = component::setResizeType
-                )
-                Spacer(Modifier.height(8.dp))
-                ScaleModeSelector(
-                    value = imageInfo.imageScaleMode,
-                    onValueChange = component::setImageScaleMode
-                )
-            }
-
-            EditExifSheet(
-                visible = showEditExifDialog,
-                onDismiss = {
-                    showEditExifDialog = false
-                },
-                exif = component.exif,
-                onClearExif = component::clearExif,
-                onUpdateTag = component::updateExifByTag,
-                onRemoveTag = component::removeExifTag
             )
         },
         buttons = {
@@ -429,6 +328,35 @@ fun SingleEditContent(
         },
         // [MOD] 不要强制照片满屏 —— 满屏会把下面的编辑选项顶出屏幕，点不到
         forceImagePreviewToMax = showOriginal
+    )
+
+    // [MOD] 半透明影调面板：贴屏幕底部，用 Popup 实现（保证弹得出来、点得到）
+    LightroomAdjustSheet(
+        visible = showLightroomAdjust,
+        onDismiss = {
+            showLightroomAdjust = false
+            component.discardLightroom()
+        },
+        values = lrValues,
+        onValuesChange = {
+            lrValues = it
+            component.previewLightroom(it)
+        },
+        onCommit = {
+            showLightroomAdjust = false
+            component.commitLightroom(lrValues)
+        },
+        onCancel = {
+            showLightroomAdjust = false
+            lrValues = LightroomValues()
+            component.discardLightroom()
+        },
+        onAuto = {
+            component.computeAutoTone { auto ->
+                lrValues = auto
+                component.previewLightroom(auto)
+            }
+        }
     )
 
     ResetDialog(
