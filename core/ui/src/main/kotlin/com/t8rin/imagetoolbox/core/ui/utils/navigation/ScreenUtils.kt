@@ -509,6 +509,7 @@ internal interface ScreenConstants {
 
 private object ScreenConstantsImpl : ScreenConstants {
     override val typedEntries by lazy {
+        // [MOD] 大幅精简：只保留 照片编辑 / AI 工具 / PDF 工具
         listOf(
             ScreenGroup(
                 entries = listOf(
@@ -517,11 +518,6 @@ private object ScreenConstantsImpl : ScreenConstants {
                     FormatConversion(),
                     Crop(),
                     ImageCutter(),
-                    WeightResize(),
-                    LimitResize(),
-                    EditExif(),
-                    DeleteExif(),
-                    BatchRename(),
                 ),
                 title = R.string.edit,
                 selectedIcon = Icons.Rounded.MiniEditLarge,
@@ -529,61 +525,17 @@ private object ScreenConstantsImpl : ScreenConstants {
             ),
             ScreenGroup(
                 entries = listOf(
-                    Filter(),
-                    Draw(),
-                    EraseBackground(),
-                    MarkupLayers(),
                     AiTools(),
-                    Curves(),
-                    CollageMaker(),
-                    Photomosaic(),
-                    ImageStitching(),
-                    ImageStacking(),
-                    ImageSplitting(),
-                    Watermarking(),
-                    GradientMaker(),
-                    MultiFrameFusion(),
-                    ShaderStudio,
-                    CodePreview,
-                    NoiseGeneration,
-                    TextureGeneration,
-                    FractalGeneration,
                 ),
-                title = R.string.create,
+                title = R.string.ai_tools,
                 selectedIcon = Icons.Rounded.WandShine,
                 baseIcon = Icons.Outlined.WandShine
             ),
             ScreenGroup(
                 entries = listOf(
-                    // [MOD] 从已移除的「图片」栏移过来的功能
-                    PickColorFromImage(),
-                    RecognizeText(),
-                    Compare(),
-                    CompressionLab(),
-                    DuplicateFinder(),
-                    Gallery,
-                    ImagePreview(),
-                    WallpapersExport,
-                    Base64Tools(),
-                    SvgMaker(),
-                    PaletteTools(),
-                    LoadNetImage(),
                     PdfTools,
-                    DocumentScanner,
-                    ScanQrCode(),
-                    ColorTools,
-                    ColorLibrary,
-                    GifTools(),
-                    Cipher(),
-                    ChecksumTools(),
-                    ArchiveTools(),
-                    AsciiArt(),
-                    JxlTools(),
-                    ApngTools(),
-                    WebpTools(),
-                    AudioCoverExtractor()
                 ),
-                title = R.string.tools,
+                title = R.string.pdf_tools,
                 selectedIcon = Icons.Rounded.ServiceToolbox,
                 baseIcon = Icons.Outlined.ServiceToolbox
             )
