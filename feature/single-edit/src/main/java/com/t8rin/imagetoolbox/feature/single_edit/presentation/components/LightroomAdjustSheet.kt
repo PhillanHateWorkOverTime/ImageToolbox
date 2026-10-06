@@ -1,20 +1,15 @@
 /*
- * [MOD] Lightroom 风格调节面板 —— 浮在照片上的半透明面板
- * 照片铺满全屏；面板贴底、半透明，调节时不挡画面。
+ * [MOD] Lightroom 风格调节面板（标准 ModalBottomSheet，保证能弹出、能交互）
+ * 分组：亮度 / 颜色 / 效果
  */
 
 package com.t8rin.imagetoolbox.feature.single_edit.presentation.components
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -35,10 +30,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.t8rin.imagetoolbox.core.ui.widget.enhanced.EnhancedModalBottomSheet
 
 /** Lightroom 调节值 */
 data class LightroomValues(
@@ -100,27 +95,33 @@ fun LightroomAdjustSheet(
     onCommit: () -> Unit,
     onCancel: () -> Unit
 ) {
-    if (!visible) return
     var group by remember { mutableStateOf(0) }
     val groups = listOf("亮度" to LIGHT_SLIDERS, "颜色" to COLOR_SLIDERS, "效果" to EFFECTS_SLIDERS)
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    EnhancedModalBottomSheet(
+        visible = visible,
+        onDismiss = { shown ->
+            if (!shown) onCancel()
+        }
+    ) {
         Column(
             modifier = Modifier
-                .align(Alignment.BottomCenter)
                 .fillMaxWidth()
-                .fillMaxHeight(0.46f)
-                .clip(RoundedCornerShape(topStart = 18.dp, topEnd = 18.dp))
-                .background(Color.Black.copy(alpha = 0.62f))
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 18.dp)
-                .padding(top = 10.dp, bottom = 20.dp)
+                .padding(top = 4.dp, bottom = 16.dp)
         ) {
+            Text(
+                text = "调整",
+                fontSize = 17.sp,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.padding(bottom = 8.dp)
+            )
+
             // 分组切换
             Row(
-                modifier = Modifier
-                    .horizontalScroll(rememberScrollState())
-                    .padding(bottom = 4.dp),
+                modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(6.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -129,7 +130,11 @@ fun LightroomAdjustSheet(
                         text = name,
                         fontSize = 15.sp,
                         fontWeight = if (group == index) FontWeight.Bold else FontWeight.Normal,
-                        color = if (group == index) Color(0xFF64B5F6) else Color(0xFFDDDDDD),
+                        color = if (group == index) {
+                            MaterialTheme.colorScheme.primary
+                        } else {
+                            MaterialTheme.colorScheme.onSurfaceVariant
+                        },
                         modifier = Modifier
                             .clip(RoundedCornerShape(10.dp))
                             .clickable { group = index }
@@ -138,14 +143,17 @@ fun LightroomAdjustSheet(
                 }
             }
 
+            Spacer(Modifier.height(4.dp))
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 if (group == 0) {
-                    Button(
-                        onClick = { onValuesChange(LightroomValues()) }
-                    ) { Text("自动") }
+                    Button(onClick = { onValuesChange(LightroomValues()) }) {
+                        Text("自动")
+                    }
+                    Spacer(Modifier.width(8.dp))
                 }
                 Spacer(Modifier.weight(1f))
                 OutlinedButton(
@@ -167,7 +175,7 @@ fun LightroomAdjustSheet(
                         }
                         onValuesChange(reset)
                     }
-                ) { Text("重置") }
+                ) { Text("重置本组") }
             }
 
             Spacer(Modifier.height(4.dp))
@@ -180,8 +188,8 @@ fun LightroomAdjustSheet(
                     Text(
                         text = spec.label,
                         fontSize = 13.sp,
-                        color = Color(0xFFEEEEEE),
-                        modifier = Modifier.width(70.dp)
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.width(74.dp)
                     )
                     Slider(
                         value = spec.get(values),
@@ -193,13 +201,14 @@ fun LightroomAdjustSheet(
                         text = if (spec.max <= 5f) String.format("%+.2f", spec.get(values))
                         else String.format("%+d", spec.get(values).toInt()),
                         fontSize = 12.sp,
-                        color = Color(0xFFBBBBBB),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.width(48.dp)
                     )
                 }
             }
 
-            Spacer(Modifier.height(8.dp))
+            Spacer(Modifier.height(12.dp))
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
